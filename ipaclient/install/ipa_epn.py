@@ -561,6 +561,7 @@ class EPN(admintool.AdminTool):
                     last=entry["sn"],
                     fullname=entry["cn"],
                     expiration=entry["krbpasswordexpiration"],
+                    expiration_datetime=datetime.strptime(entry["krbpasswordexpiration"], "%Y-%m-%d %H:%M:%S"),
                 )
                 self._mailer.send_message(
                     mail_subject=api.env.msg_subject,
