@@ -549,6 +549,11 @@ class EPN(admintool.AdminTool):
             except TemplateSyntaxError as e:
                 raise RuntimeError("Parsing template %s failed: %s" %
                                    (e.filename, e))
+            try:
+                subject_template = self.env.from_string(api.env.msg_subject)
+            except TemplateSyntaxError as e:
+                raise RuntimeError("Parsing template %s failed: %s" %
+                                   (e.filename, e))
             if api.env.mail_from:
                 mail_from = api.env.mail_from
             else:
@@ -569,8 +574,17 @@ class EPN(admintool.AdminTool):
                     expiration_datetime=expdate,
                     expiration_delta=expdelta,
                 )
+                subject = subject_template.render(
+                    uid=entry["uid"],
+                    first=entry["givenname"],
+                    last=entry["sn"],
+                    fullname=entry["cn"],
+                    expiration=entry["krbpasswordexpiration"],
+                    expiration_datetime=expdate,
+                    expiration_delta=expdelta,
+                )
                 self._mailer.send_message(
-                    mail_subject=api.env.msg_subject,
+                    mail_subject=subject,
                     mail_body=body,
                     subscribers=ast.literal_eval(entry["mail"]),
                     mail_from=mail_from,
